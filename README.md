@@ -15,7 +15,7 @@ upfront-cost fear and uncertainty ("what size do I need? will it pay back?").
 This tool removes that uncertainty, one household at a time.
 
 ## ▶️ Try it
-👉 [Live app](https://YOUR-APP-URL)
+👉 [Live app](https://ghana-solar-tool-49rijepntc4anhgers8p52)
 
 ## 🧮 How it works
 1. **Load:** sum of (watts × quantity × hours/day) → daily kWh.
