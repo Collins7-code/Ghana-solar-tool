@@ -28,6 +28,40 @@ default_appliances = pd.DataFrame({
     "Hours_per_day":[5,8,5,6,3,4,0.5,0],
 })
 appliances = st.data_editor(default_appliances, num_rows="dynamic", use_container_width=True)
+import requests, json
+
+# ---------- 5. REQUEST A PROFESSIONAL QUOTE (lead capture) ----------
+st.header("5️⃣ Want a professional to confirm this? Request a quote")
+st.caption("We'll send your sized system to a vetted installer in your region. Free, no obligation.")
+
+with st.form("lead_form"):
+    name  = st.text_input("Your name")
+    phone = st.text_input("Phone / WhatsApp")
+    town  = st.text_input("Town / area")
+    submitted = st.form_submit_button("📩 Request a quote")
+
+if submitted:
+    if name and phone:
+        lead = {
+            "name": name, "phone": phone, "town": town, "region": region,
+            "sun_hours": sun_hours, "daily_kwh": round(daily_kwh,2),
+            "panel_kw": round(panel_kw,2), "battery_kwh": round(battery_kwh,1),
+            "inverter_kw": round(inverter_kw,1), "est_cost_ghs": round(total,0),
+        }
+        r = requests.post(
+            "https://formsubmit.co/ajax/felixnyankson53@gmail.com",   # ← put YOUR email
+            headers={"Content-Type":"application/json","Accept":"application/json"},
+            data=json.dumps({"_subject":"New solar lead ☀️", **lead}),
+        )
+        if r.status_code == 200:
+            st.success("✅ Sent! An installer will contact you on WhatsApp shortly.")
+        else:
+            st.error("Couldn't send right now — please call us instead.")
+    else:
+        st.warning("Please add your name and phone.")
+
+st.markdown("---")
+st.caption("⚠️ This tool gives independent estimates to help you decide. It is not a substitute for a professional site assessment. Confirm with 2–3 quotes.")
 
 daily_wh = (appliances["Watts_each"]*appliances["Quantity"]*appliances["Hours_per_day"]).sum()
 daily_kwh = daily_wh/1000.0
