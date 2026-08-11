@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import requests, json
+import requests, json, urllib.parse
 
 st.set_page_config(page_title="Solar Decision Tool — Ghana", page_icon="☀️", layout="wide")
 
@@ -85,9 +85,11 @@ if monthly_savings>0:
 else:
     st.warning("Add your bill or generator spend to see payback.")
 
-# ---------- 5. LEAD CAPTURE (must stay at the BOTTOM) ----------
+# ---------- 5. LEAD CAPTURE (email primary) ----------
+LEAD_EMAIL = "felixnyankson53@gmail.com"   # ← your business email (already filled in)
+
 st.header("5️⃣ Want a professional to confirm this? Request a quote")
-st.caption("We'll send your sized system to a vetted installer in your region. Free, no obligation.")
+st.caption("We'll email your sized system to our team. Free, no obligation.")
 
 with st.form("lead_form"):
     name  = st.text_input("Your name")
@@ -103,15 +105,24 @@ if submitted:
             "panel_kw": round(panel_kw,2), "battery_kwh": round(battery_kwh,1),
             "inverter_kw": round(inverter_kw,1), "est_cost_ghs": round(total,0),
         }
-        r = requests.post(
-            "https://formsubmit.co/ajax/felixnyankson53@gmail.com",   # ← put YOUR real email back in
-            headers={"Content-Type":"application/json","Accept":"application/json"},
-            data=json.dumps({"_subject":"New solar lead ☀️", **lead}),
-        )
-        if r.status_code == 200:
-            st.success("✅ Sent! An installer will contact you on WhatsApp shortly.")
-        else:
-            st.error("Couldn't send right now — please call us instead.")
+        lead_text = "\n".join(f"{k}: {v}" for k,v in lead.items())
+        try:
+            r = requests.post(
+                f"https://formsubmit.co/ajax/{LEAD_EMAIL}",
+                headers={"Content-Type":"application/json","Accept":"application/json"},
+                data=json.dumps({"_subject":"New solar lead ☀️", **lead}),
+            )
+            resp = r.json()
+            if str(resp.get("success")).lower() == "true":
+                st.success("✅ Lead sent! (First time? Check the business email for a FormSubmit activation link, click it once, then submit again.)")
+            else:
+                st.error(f"Email service said: {resp.get('message','unknown error')}")
+        except Exception:
+            st.error("Couldn't reach the email service right now.")
+
+        st.caption("Prefer WhatsApp instead?")
+        wa = "https://wa.me/233535417063?text=" + urllib.parse.quote("☀️ NEW SOLAR LEAD\n"+lead_text)
+        st.link_button("📲 Send via WhatsApp", wa)
     else:
         st.warning("Please add your name and phone.")
 
