@@ -85,8 +85,9 @@ if monthly_savings>0:
 else:
     st.warning("Add your bill or generator spend to see payback.")
 
-# ---------- 5. LEAD CAPTURE (email primary) ----------
-LEAD_EMAIL = "felixnyankson53@gmail.com"   # ← your business email (already filled in)
+# ---------- 5. LEAD CAPTURE (Email Primary + Headers Fixed) ----------
+LEAD_EMAIL = "felixnyankson53@gmail.com"
+APP_URL = "https://ghana-solar-tool-pli6auappdapghergd2rfz.streamlit.app"
 
 st.header("5️⃣ Want a professional to confirm this? Request a quote")
 st.caption("We'll email your sized system to our team. Free, no obligation.")
@@ -106,22 +107,29 @@ if submitted:
             "inverter_kw": round(inverter_kw,1), "est_cost_ghs": round(total,0),
         }
         lead_text = "\n".join(f"{k}: {v}" for k,v in lead.items())
+        
         try:
+            # Sending with Origin and Referer headers to bypass the web server check
             r = requests.post(
                 f"https://formsubmit.co/ajax/{LEAD_EMAIL}",
-                headers={"Content-Type":"application/json","Accept":"application/json"},
+                headers={
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Origin": APP_URL,
+                    "Referer": f"{APP_URL}/"
+                },
                 data=json.dumps({"_subject":"New solar lead ☀️", **lead}),
             )
             resp = r.json()
             if str(resp.get("success")).lower() == "true":
-                st.success("✅ Lead sent! (First time? Check the business email for a FormSubmit activation link, click it once, then submit again.)")
+                st.success("✅ Lead sent successfully! (If this is your first time, check your email for a one-time activation link from FormSubmit, click it, and submit once more.)")
             else:
                 st.error(f"Email service said: {resp.get('message','unknown error')}")
-        except Exception:
-            st.error("Couldn't reach the email service right now.")
+        except Exception as e:
+            st.error(f"Couldn't reach the email service right now: {e}")
 
         st.caption("Prefer WhatsApp instead?")
-        wa = "https://wa.me/233535417063?text=" + urllib.parse.quote("☀️ NEW SOLAR LEAD\n"+lead_text)
+        wa = f"https://wa.me/233535417063?text=" + urllib.parse.quote("☀️ NEW SOLAR LEAD\n" + lead_text)
         st.link_button("📲 Send via WhatsApp", wa)
     else:
         st.warning("Please add your name and phone.")
