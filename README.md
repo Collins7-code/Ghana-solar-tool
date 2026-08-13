@@ -42,3 +42,7 @@ Python · Pandas · NumPy · Streamlit
 
 ---
 *One rooftop at a time. ⚡*
+## 🤝 Contribute
+This project is built in the open. Read [CONTRIBUTING.md](CONTRIBUTING.md)
+and grab a `good first issue` — coders, data people, translators, installers:
+there's a door with your name on it.
